@@ -73,7 +73,7 @@ export default function DashboardPage() {
                     Xush kelibsiz, {user?.phone || "Student"}!
                 </h1>
                 <p className="text-muted-foreground mt-2">
-                    Bugungi o'qish jarayoningiz va statistikangiz.
+                    Bugungi o&apos;qish jarayoningiz va statistikangiz.
                 </p>
             </div>
 
@@ -111,7 +111,7 @@ export default function DashboardPage() {
                 <div className="glass-card p-6 lg:col-span-2">
                     <h3 className="text-lg font-semibold text-white mb-4">Davom etish</h3>
                     <div className="h-40 rounded-xl bg-white/5 flex items-center justify-center text-muted-foreground border border-dashed border-white/10">
-                        Hozircha faol kurslar yo'q
+                        Hozircha faol kurslar yo&apos;q
                     </div>
                 </div>
                 <div className="glass-card p-6">

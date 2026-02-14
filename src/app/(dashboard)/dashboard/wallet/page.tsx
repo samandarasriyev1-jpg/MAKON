@@ -167,7 +167,7 @@ export default function WalletPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                     <div className="glass-card w-full max-w-md p-6 rounded-3xl animate-in fade-in zoom-in duration-200">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-xl font-bold text-white">Karta Qo'shish</h3>
+                            <h3 className="text-xl font-bold text-white">Karta Qo&apos;shish</h3>
                             <button onClick={() => setIsAddCardOpen(false)} className="text-muted-foreground hover:text-white">
                                 <X className="h-6 w-6" />
                             </button>
@@ -207,7 +207,7 @@ export default function WalletPage() {
                 <div>
                     <h1 className="text-3xl font-bold text-white glow-text">Mening Hamyonim</h1>
                     <p className="text-muted-foreground mt-2">
-                        Mablag'larni boshqarish va to'lovlar tarixi.
+                        Mablag&apos;larni boshqarish va to'lovlar tarixi.
                     </p>
                 </div>
                 <button
@@ -256,7 +256,7 @@ export default function WalletPage() {
                             <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <CreditCard className="h-5 w-5 text-blue-400" />
                             </div>
-                            <span className="text-sm font-medium text-white">Karta Qo'shish</span>
+                            <span className="text-sm font-medium text-white">Karta Qo&apos;shish</span>
                         </button>
                         <button className="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/50 transition-all flex flex-col items-center gap-3 text-center group">
                             <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -273,7 +273,7 @@ export default function WalletPage() {
                 <div className="p-6 border-b border-white/10 flex items-center justify-between">
                     <h3 className="font-bold text-white flex items-center gap-2">
                         <History className="h-5 w-5 text-primary" />
-                        So'nggi O'tkazmalar
+                        So&apos;nggi O&apos;tkazmalar
                     </h3>
                 </div>
                 <div className="divide-y divide-white/5">
@@ -311,7 +311,7 @@ export default function WalletPage() {
                     ))}
                     {transactions.length === 0 && (
                         <div className="p-12 text-center text-muted-foreground">
-                            Hozircha o'tkazmalar yo'q.
+                            Hozircha o&apos;tkazmalar yo&apos;q.
                         </div>
                     )}
                 </div>

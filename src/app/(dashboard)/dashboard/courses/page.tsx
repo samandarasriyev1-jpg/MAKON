@@ -67,7 +67,7 @@ export default function CoursesPage() {
                                     className="flex items-center gap-2 bg-white/5 hover:bg-primary hover:text-[#0A192F] text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
                                 >
                                     <PlayCircle className="h-4 w-4" />
-                                    Ko'rish
+                                    Ko&apos;rish
                                 </Link>
                             </div>
                         </div>

@@ -217,8 +217,8 @@ export default function CommunityPage() {
 
                             <div className="flex items-start gap-3 mb-4">
                                 <div className={`h-10 w-10 rounded-full flex-shrink-0 bg-gradient-to-tr ${post.user.avatar === 'blue' ? 'from-blue-500 to-cyan-400' :
-                                        post.user.avatar === 'purple' ? 'from-purple-500 to-pink-400' :
-                                            'from-green-500 to-emerald-400'
+                                    post.user.avatar === 'purple' ? 'from-purple-500 to-pink-400' :
+                                        'from-green-500 to-emerald-400'
                                     }`} />
                                 <div>
                                     <div className="flex items-center gap-2">
@@ -329,7 +329,7 @@ export default function CommunityPage() {
                 <div className="glass-card p-5 rounded-2xl">
                     <h3 className="font-bold text-white mb-2">MAKON Hamjamiyati</h3>
                     <p className="text-xs text-muted-foreground mb-4">
-                        Bu yerda siz savol berishingiz, tajriba almashishingiz va boshqa o'quvchilar bilan tanishishingiz mumkin.
+                        Bu yerda siz savol berishingiz, tajriba almashishingiz va boshqa o&apos;quvchilar bilan tanishishingiz mumkin.
                     </p>
                     <div className="flex items-center gap-2 text-xs text-white/60">
                         <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
@@ -346,8 +346,8 @@ export default function CommunityPage() {
                                 key={cat.name}
                                 onClick={() => setActiveTab(cat.name)}
                                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === cat.name
-                                        ? "bg-primary/20 text-primary"
-                                        : "text-white/70 hover:bg-white/5 hover:text-white"
+                                    ? "bg-primary/20 text-primary"
+                                    : "text-white/70 hover:bg-white/5 hover:text-white"
                                     }`}
                             >
                                 <span>{cat.name}</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -28,10 +29,17 @@ export function Sidebar() {
 
     return (
         <div className="flex h-full w-20 flex-col items-center py-8 glass-sidebar lg:w-64 lg:items-start lg:px-6 transition-all duration-300">
+
             {/* Logo */}
             <div className="mb-10 flex items-center justify-center lg:justify-start lg:w-full gap-3">
                 <div className="relative h-14 w-14 rounded-2xl bg-white shadow-lg shadow-primary/20 overflow-hidden flex items-center justify-center p-1.5 flex-shrink-0">
-                    <img src="/logo.jpg" alt="MAKON Logo" className="h-full w-full object-contain" />
+                    <Image
+                        src="/logo.jpg"
+                        alt="MAKON Logo"
+                        width={56}
+                        height={56}
+                        className="h-full w-full object-contain"
+                    />
                 </div>
                 <span className="hidden lg:block text-2xl font-bold tracking-tight text-white glow-text">
                     MAKON

@@ -1,14 +1,22 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 export default function Home() {
     return (
         <div className="min-h-screen bg-[#0A192F] text-white">
             {/* Navigation */}
+
             <nav className="fixed top-0 z-50 w-full glass-sidebar border-b border-white/5 px-6 py-4">
                 <div className="mx-auto flex max-w-7xl items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <img src="/logo.jpg" alt="MAKON" className="h-10 w-10 rounded-lg object-cover" />
+                        <Image
+                            src="/logo.jpg"
+                            alt="MAKON"
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 rounded-lg object-cover"
+                        />
                         <span className="text-xl font-bold">MAKON</span>
                     </div>
                     <div className="flex items-center gap-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase";
@@ -82,9 +83,16 @@ export default function LoginPage() {
                 Ortga
             </Link>
 
+
             <div className="glass-card w-full max-w-md p-8 animate-in fade-in zoom-in duration-500">
                 <div className="mb-8 text-center flex flex-col items-center">
-                    <img src="/logo.jpg" alt="MAKON" className="h-16 w-16 mb-4 rounded-2xl object-cover shadow-lg shadow-primary/20" />
+                    <Image
+                        src="/logo.jpg"
+                        alt="MAKON"
+                        width={64}
+                        height={64}
+                        className="h-16 w-16 mb-4 rounded-2xl object-cover shadow-lg shadow-primary/20"
+                    />
                     <h1 className="text-3xl font-bold text-white">Xush Kelibsiz</h1>
                     <p className="mt-2 text-sm text-muted-foreground">
                         {step === "PHONE" ? "Telefon raqamingiz orqali kiring" : "SMS kodni kiriting"}

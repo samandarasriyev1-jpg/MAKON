@@ -95,7 +95,7 @@ export default function AffiliatePage() {
                 <div className="p-6 border-b border-white/10">
                     <h3 className="font-bold text-white flex items-center gap-2">
                         <Users className="h-5 w-5 text-primary" />
-                        So'nggi Takliflar
+                        So&apos;nggi Takliflar
                     </h3>
                 </div>
                 <div className="overflow-x-auto">

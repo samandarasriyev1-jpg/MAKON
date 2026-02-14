@@ -27,7 +27,7 @@ export default function AffiliatePage() {
             <div>
                 <h1 className="text-3xl font-bold text-white glow-text">Hamkorlik Dasturi</h1>
                 <p className="text-muted-foreground mt-2">
-                    Do'stlaringizni taklif qiling va har bir xarid uchun 20% komissiya oling.
+                    Do&apos;stlaringizni taklif qiling va har bir xarid uchun 20% komissiya oling.
                 </p>
             </div>
 
@@ -48,8 +48,8 @@ export default function AffiliatePage() {
                         <button
                             onClick={handleCopy}
                             className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${copied
-                                    ? "bg-green-500/20 text-green-400 border border-green-500/50"
-                                    : "bg-primary text-[#0A192F] hover:bg-primary/90 shadow-lg shadow-primary/20"
+                                ? "bg-green-500/20 text-green-400 border border-green-500/50"
+                                : "bg-primary text-[#0A192F] hover:bg-primary/90 shadow-lg shadow-primary/20"
                                 }`}
                         >
                             {copied ? (
@@ -66,7 +66,7 @@ export default function AffiliatePage() {
                         </button>
                     </div>
                     <p className="text-sm text-muted-foreground mt-4">
-                        Bu havolani do'stlaringizga yuboring. Ular ro'yxatdan o'tib, kurs sotib olganda siz hisobingizga bonus olasiz.
+                        Bu havolani do&apos;stlaringizga yuboring. Ular ro&apos;yxatdan o&apos;tib, kurs sotib olganda siz hisobingizga bonus olasiz.
                     </p>
                 </div>
             </div>
@@ -110,10 +110,10 @@ export default function AffiliatePage() {
                         </thead>
                         <tbody className="divide-y divide-white/5">
                             {[
-                                { name: "O'quvchi 1", date: "Bugun, 14:30", status: "Xarid qildi", amount: "+150,000 UZS", statusColor: "text-green-400" },
-                                { name: "O'quvchi 2", date: "Kecha, 09:15", status: "Ro'yxatdan o'tdi", amount: "0 UZS", statusColor: "text-blue-400" },
-                                { name: "O'quvchi 3", date: "12 Fev, 18:45", status: "Xarid qildi", amount: "+150,000 UZS", statusColor: "text-green-400" },
-                                { name: "O'quvchi 4", date: "10 Fev, 11:20", status: "Kutilmoqda", amount: "0 UZS", statusColor: "text-yellow-400" },
+                                { name: "O&apos;quvchi 1", date: "Bugun, 14:30", status: "Xarid qildi", amount: "+150,000 UZS", statusColor: "text-green-400" },
+                                { name: "O&apos;quvchi 2", date: "Kecha, 09:15", status: "Ro&apos;yxatdan o&apos;tdi", amount: "0 UZS", statusColor: "text-blue-400" },
+                                { name: "O&apos;quvchi 3", date: "12 Fev, 18:45", status: "Xarid qildi", amount: "+150,000 UZS", statusColor: "text-green-400" },
+                                { name: "O&apos;quvchi 4", date: "10 Fev, 11:20", status: "Kutilmoqda", amount: "0 UZS", statusColor: "text-yellow-400" },
                             ].map((row, i) => (
                                 <tr key={i} className="hover:bg-white/5 transition-colors">
                                     <td className="p-4 font-medium text-white">{row.name}</td>

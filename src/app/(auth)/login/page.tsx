@@ -67,7 +67,7 @@ export default function LoginPage() {
                 // OR check if we can just redirect (AuthGuard defines access)
                 router.push("/dashboard");
             } else {
-                setError("Kod noto'g'ri (Demo uchun: 123456)");
+                setError("Kod noto&apos;g&apos;ri (Demo uchun: 123456)");
             }
         } else {
             router.push("/dashboard");
@@ -137,15 +137,15 @@ export default function LoginPage() {
                             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Tasdiqlash"}
                         </button>
                         <button type="button" onClick={() => setStep("PHONE")} className="w-full text-sm text-muted-foreground hover:text-white mt-2">
-                            Raqamni o'zgartirish
+                            Raqamni o&apos;zgartirish
                         </button>
                     </form>
                 )}
 
                 <div className="mt-6 text-center text-sm text-muted-foreground">
-                    Akkauntingiz yo'qmi?{" "}
+                    Akkauntingiz yo&apos;qmi?{" "}
                     <Link href="/register" className="text-primary hover:underline">
-                        Ro'yxatdan o'ting
+                        Ro&apos;yxatdan o&apos;ting
                     </Link>
                 </div>
             </div>

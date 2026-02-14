@@ -38,9 +38,9 @@ export default function RegisterPage() {
             <div className="glass-card w-full max-w-md p-8 animate-in fade-in zoom-in duration-500">
                 <div className="mb-8 text-center flex flex-col items-center">
                     <img src="/logo.jpg" alt="MAKON" className="h-16 w-16 mb-4 rounded-2xl object-cover shadow-lg shadow-primary/20" />
-                    <h1 className="text-3xl font-bold text-white">Ro'yxatdan o'tish</h1>
+                    <h1 className="text-3xl font-bold text-white">Ro&apos;yxatdan o&apos;tish</h1>
                     <p className="mt-2 text-sm text-muted-foreground">
-                        MAKON platformasiga qo'shiling
+                        MAKON platformasiga qo&apos;shiling
                     </p>
                 </div>
 
@@ -71,7 +71,7 @@ export default function RegisterPage() {
                                     : "bg-black/20 text-muted-foreground border-white/10 hover:bg-white/5"
                                     }`}
                             >
-                                O'quvchi
+                                O&apos;quvchi
                             </button>
                             <button
                                 type="button"
@@ -81,7 +81,7 @@ export default function RegisterPage() {
                                     : "bg-black/20 text-muted-foreground border-white/10 hover:bg-white/5"
                                     }`}
                             >
-                                O'qituvchi
+                                O&apos;qituvchi
                             </button>
                         </div>
                     </div>

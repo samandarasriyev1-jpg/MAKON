@@ -361,7 +361,7 @@ export default function CommunityPage() {
                 <div className="p-4 rounded-2xl border border-white/5 bg-black/20">
                     <h4 className="font-bold text-white text-sm mb-3">Qoidalar</h4>
                     <ul className="space-y-2 text-xs text-muted-foreground list-disc pl-4">
-                        <li>Hurmatli bo'ling</li>
+                        <li>Hurmatli bo&apos;ling</li>
                         <li>Spam tarqatmang</li>
                         <li>Mavzuga doir yozing</li>
                     </ul>

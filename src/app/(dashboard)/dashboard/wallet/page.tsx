@@ -207,7 +207,7 @@ export default function WalletPage() {
                 <div>
                     <h1 className="text-3xl font-bold text-white glow-text">Mening Hamyonim</h1>
                     <p className="text-muted-foreground mt-2">
-                        Mablag&apos;larni boshqarish va to'lovlar tarixi.
+                        Mablag&apos;larni boshqarish va to&apos;lovlar tarixi.
                     </p>
                 </div>
                 <button
@@ -262,7 +262,7 @@ export default function WalletPage() {
                             <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <History className="h-5 w-5 text-primary" />
                             </div>
-                            <span className="text-sm font-medium text-white">To'liq Tarix</span>
+                            <span className="text-sm font-medium text-white">To&apos;liq Tarix</span>
                         </button>
                     </div>
                 </div>

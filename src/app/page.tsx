@@ -32,16 +32,16 @@ export default function Home() {
                 </h1>
 
                 <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-                    Top o'qituvchilardan o'rganing, bilimingizni monetizatsiya qiling va professional hamjamiyatga qo'shiling.
+                    Top o&apos;qituvchilardan o&apos;rganing, bilimingizni monetizatsiya qiling va professional hamjamiyatga qo&apos;shiling.
                 </p>
 
                 <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                     <Link href="/register" className="glass-card group flex items-center gap-2 px-8 py-4 text-lg font-bold text-white hover:bg-white/10 transition-all border-primary/50">
-                        Hoziroq Qo'shiling
+                        Hoziroq Qo&apos;shiling
                         <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </Link>
                     <Link href="/explore" className="flex items-center gap-2 px-8 py-4 text-lg font-medium text-muted-foreground hover:text-white">
-                        Kurslarni Ko'rish
+                        Kurslarni Ko&apos;rish
                     </Link>
                 </div>
 

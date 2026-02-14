@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 222 47% 11%;
+        --foreground: 210 40% 98%;
+
+        --card: 222 47% 11%;
+        --card-foreground: 210 40% 98%;
+
+        --popover: 222 47% 11%;
+        --popover-foreground: 210 40% 98%;
+
+        --primary: 190 100% 42%;
+        --primary-foreground: 222 47% 11%;
+
+        --secondary: 217 32% 17%;
+        --secondary-foreground: 210 40% 98%;
+
+        --muted: 217 32% 17%;
+        --muted-foreground: 215 20.2% 65.1%;
+
+        --accent: 190 100% 42%;
+        --accent-foreground: 222 47% 11%;
+
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 210 40% 98%;
+
+        --border: 217 32% 17%;
+        --input: 217 32% 17%;
+        --ring: 190 100% 42%;
+
+        --radius: 0.5rem;
+    }
+}
+
+@layer components {
+    .glass-card {
+        @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl;
+        /* Custom override if needed, using Tailwind utilities where possible */
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .glass-sidebar {
+        @apply bg-[#0A192F]/70 backdrop-blur-md border-r border-white/5;
+    }
+}
+
+body {
+    @apply bg-[#0A192F] text-[#E2E8F0] font-sans;
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -19,13 +19,20 @@ interface Lesson {
 }
 
 import { useAuth } from "@/components/providers/auth-provider";
+import { useProgress } from "@/components/providers/progress-provider";
+import { useRef } from "react";
 
 export default function LessonPage() {
     const params = useParams();
     const { user } = useAuth();
+    const { updateProgress, progress } = useProgress();
     const [lesson, setLesson] = useState<Lesson | null>(null);
     const [loading, setLoading] = useState(true);
     const supabase = createClient();
+    const lastSavedRef = useRef(0);
+    const [isPlayerReady, setIsPlayerReady] = useState(false);
+
+    const lessonProgress = progress.find(p => p.lesson_id === params.lessonId);
 
     useEffect(() => {
         async function fetchLesson() {
@@ -46,20 +53,29 @@ export default function LessonPage() {
     const handleComplete = async () => {
         if (!user || !lesson) return;
 
-        // Optimistic UI update (optional, but good for UX)
-        // For now we just call Supabase
-        const { error } = await supabase
-            .from("video_progress")
-            .upsert({
-                user_id: user.id,
-                lesson_id: lesson.id,
-                is_completed: true,
-                watched_seconds: 0 // We could track real progress from Vidstack events later
-            }, { onConflict: 'user_id, lesson_id' });
+        await updateProgress(params.courseId as string, lesson.id, lastSavedRef.current, true);
+        alert("Dars tugatildi!");
+    };
 
-        if (!error) {
-            // Show success or change button state
-            alert("Dars tugatildi!");
+    const handleTimeUpdate = (e: any) => {
+        if (!lesson) return;
+
+        // e.detail.currentTime contains the current playback position
+        const currentTime = e?.detail?.currentTime || 0;
+
+        // Save progress every 15 seconds
+        if (Math.abs(currentTime - lastSavedRef.current) > 15) {
+            lastSavedRef.current = currentTime;
+            updateProgress(params.courseId as string, lesson.id, Math.floor(currentTime), lessonProgress?.completed || false);
+        }
+    };
+
+    const handleProviderSetup = (provider: any) => {
+        // Automatically start from last saved position if any
+        if (lessonProgress && lessonProgress.progress_seconds > 0 && !isPlayerReady) {
+            provider.currentTime = lessonProgress.progress_seconds;
+            lastSavedRef.current = lessonProgress.progress_seconds;
+            setIsPlayerReady(true);
         }
     };
 
@@ -79,7 +95,12 @@ export default function LessonPage() {
             {/* Video Player */}
             <div className="glass-card overflow-hidden rounded-2xl aspect-video bg-black">
                 {lesson.video_url ? (
-                    <MediaPlayer title={`Dars ${lesson.order}`} src={lesson.video_url}>
+                    <MediaPlayer
+                        title={`Dars ${lesson.order}`}
+                        src={lesson.video_url}
+                        onTimeUpdate={handleTimeUpdate}
+                        onProviderSetup={handleProviderSetup}
+                    >
                         <MediaProvider />
                         <DefaultVideoLayout icons={defaultLayoutIcons} />
                     </MediaPlayer>
@@ -98,10 +119,13 @@ export default function LessonPage() {
                     </h1>
                     <button
                         onClick={handleComplete}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-500 rounded-lg hover:bg-green-500/20 transition-colors font-medium border border-green-500/20"
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors font-medium border ${lessonProgress?.completed
+                            ? 'bg-green-500/20 text-green-500 border-green-500/50'
+                            : 'bg-green-500/10 text-green-500/70 border-green-500/20 hover:bg-green-500/20 hover:text-green-500'
+                            }`}
                     >
                         <CheckCircle className="h-4 w-4" />
-                        Tugatdim
+                        {lessonProgress?.completed ? "Tugatilgan" : "Tugatdim"}
                     </button>
                 </div>
 

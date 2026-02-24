@@ -1,4 +1,5 @@
 import { Sidebar } from "@/components/layout/sidebar";
+import { ProgressProvider } from "@/components/providers/progress-provider";
 
 export default function DashboardLayout({
     children,
@@ -9,9 +10,11 @@ export default function DashboardLayout({
         <div className="flex h-screen overflow-hidden bg-background">
             <Sidebar />
             <main className="flex-1 overflow-y-auto p-4 lg:p-8">
-                <div className="mx-auto max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    {children}
-                </div>
+                <ProgressProvider>
+                    <div className="mx-auto max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {children}
+                    </div>
+                </ProgressProvider>
             </main>
         </div>
     );

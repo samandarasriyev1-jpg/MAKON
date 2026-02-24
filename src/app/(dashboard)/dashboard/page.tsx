@@ -3,11 +3,14 @@
 import { Wallet, Users, BookOpen, TrendingUp, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useProgress } from "@/components/providers/progress-provider";
+import { PlayCircle } from "lucide-react";
 
 export default function DashboardPage() {
     const { user, isLoading: authLoading } = useAuth();
+    const { progress, getLastAccessedLesson } = useProgress();
     const supabase = createClient();
     const [stats, setStats] = useState({
         courses: 0,
@@ -16,6 +19,9 @@ export default function DashboardPage() {
         wallet: 0,
     });
     const [loading, setLoading] = useState(true);
+    const [lastAccessData, setLastAccessData] = useState<{ courseTitle: string, lessonTitle: string, progressSec: number } | null>(null);
+
+    const lastAccess = getLastAccessedLesson();
 
     useEffect(() => {
         if (authLoading) return;
@@ -54,8 +60,30 @@ export default function DashboardPage() {
             }
         }
 
+        async function fetchLastAccessDetails() {
+            if (!lastAccess) return;
+            try {
+                const { data } = await supabase
+                    .from('lessons')
+                    .select('title, course:courses(title)')
+                    .eq('id', lastAccess.lesson_id)
+                    .single();
+
+                if (data) {
+                    setLastAccessData({
+                        lessonTitle: data.title,
+                        courseTitle: (data.course as any)?.title || 'Kurs',
+                        progressSec: lastAccess.progress_seconds
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
         fetchData();
-    }, [user, authLoading, supabase]);
+        fetchLastAccessDetails();
+    }, [user, authLoading, supabase, lastAccess]);
 
     if (authLoading || loading) {
         return (
@@ -80,8 +108,8 @@ export default function DashboardPage() {
             {/* Stats Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {[
-                    { label: "Jami Kurslar", value: stats.courses.toString(), icon: BookOpen, color: "text-blue-400" },
-                    { label: "O'zlashtirish", value: `${stats.progress}%`, icon: TrendingUp, color: "text-green-400" },
+                    { label: "O'zlashtirilgan", value: progress.filter((p: any) => p.completed).length.toString(), icon: BookOpen, color: "text-blue-400" },
+                    { label: "Boshlangan", value: progress.length.toString(), icon: TrendingUp, color: "text-green-400" },
                     { label: "Hamjamiyat XP", value: stats.xp.toLocaleString(), icon: Users, color: "text-purple-400" },
                     { label: "Hamyon", value: `${stats.wallet.toLocaleString()} UZS`, icon: Wallet, color: "text-primary" },
                 ].map((stat, i) => {
@@ -108,11 +136,35 @@ export default function DashboardPage() {
 
             {/* Recent Activity / Content Placeholder */}
             <div className="grid gap-6 lg:grid-cols-3">
-                <div className="glass-card p-6 lg:col-span-2">
+                <div className="glass-card p-6 lg:col-span-2 flex flex-col items-start min-h-[220px]">
                     <h3 className="text-lg font-semibold text-white mb-4">Davom etish</h3>
-                    <div className="h-40 rounded-xl bg-white/5 flex items-center justify-center text-muted-foreground border border-dashed border-white/10">
-                        Hozircha faol kurslar yo&apos;q
-                    </div>
+
+                    {lastAccess && lastAccessData ? (
+                        <div className="w-full flex-1 rounded-xl bg-white/5 border border-white/10 p-6 flex flex-col justify-between hover:bg-white/10 transition-colors cursor-pointer relative overflow-hidden group">
+                            <Link href={`/dashboard/courses/${lastAccess.course_id}/lessons/${lastAccess.lesson_id}`} className="absolute inset-0 z-10" />
+                            <div>
+                                <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">{lastAccessData.courseTitle}</div>
+                                <h4 className="text-xl font-bold text-white max-w-[80%]">{lastAccessData.lessonTitle}</h4>
+                            </div>
+
+                            <div className="flex items-center justify-between mt-6">
+                                <div className="text-sm text-green-400 flex items-center gap-2">
+                                    <PlayCircle className="h-5 w-5" />
+                                    Davom etish
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                    {Math.floor(lastAccessData.progressSec / 60)} daqiqa o'qildi
+                                </div>
+                            </div>
+                            <div className="absolute right-[-20px] bottom-[-20px] opacity-10 group-hover:scale-110 transition-transform duration-500">
+                                <PlayCircle className="h-40 w-40" />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="w-full h-full min-h-[140px] rounded-xl bg-white/5 flex items-center justify-center text-muted-foreground border border-dashed border-white/10">
+                            Hozircha faol kurslar yo'q
+                        </div>
+                    )}
                 </div>
                 <div className="glass-card p-6">
                     <h3 className="text-lg font-semibold text-white mb-4">Leaderboard</h3>

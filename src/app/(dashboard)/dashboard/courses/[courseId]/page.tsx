@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { ArrowLeft, PlayCircle, Lock } from "lucide-react";
 import { useParams } from "next/navigation";

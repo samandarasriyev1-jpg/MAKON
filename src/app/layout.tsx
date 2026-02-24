@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         siteName: "MAKON",
     },
     icons: {
-        icon: "/favicon.ico",
+        icon: "/icon.svg",
     },
 };
 

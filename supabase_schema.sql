@@ -107,3 +107,21 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- 6. User Progress Table (Foydalanuvchi dars jarayoni)
+create table if not exists public.user_progress (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  course_id uuid references public.courses(id) on delete cascade not null,
+  lesson_id uuid references public.lessons(id) on delete cascade not null,
+  completed boolean default false,
+  progress_seconds integer default 0,
+  last_accessed timestamp with time zone default timezone('utc'::text, now()),
+  unique(user_id, lesson_id)
+);
+
+-- RLS User Progress uchun
+alter table public.user_progress enable row level security;
+create policy "Users can view own progress." on public.user_progress for select using (auth.uid() = user_id);
+create policy "Users can insert own progress." on public.user_progress for insert with check (auth.uid() = user_id);
+create policy "Users can update own progress." on public.user_progress for update using (auth.uid() = user_id);

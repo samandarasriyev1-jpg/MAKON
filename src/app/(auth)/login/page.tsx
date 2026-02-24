@@ -1,79 +1,69 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, Lock } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 import { useState } from "react";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-    const [phone, setPhone] = useState("");
-    const [otp, setOtp] = useState("");
-    const [step, setStep] = useState<"PHONE" | "OTP">("PHONE");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const supabase = createClient();
     const router = useRouter();
 
-    const handleSendCode = async (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError("");
 
-        // Simulate Uzbekistan phone format check
-        const formattedPhone = phone.startsWith("+") ? phone : `+998${phone.replace(/\s/g, "")}`;
+        try {
+            const { error: authError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-        // For Demo: If Supabase Phone Auth isn't set up, this might fail.
-        // We will try to sign in with OTP.
-        const { error } = await supabase.auth.signInWithOtp({
-            phone: formattedPhone,
-        });
+            if (authError) {
+                setError(authError.message);
+                return;
+            }
 
-        if (error) {
-            // Fallback for demo if Phone auth is disabled: Just Mock it to let user see the UI
-            // In production, we MUST show the error.
-            // setError(error.message); 
-            // console.error(error);
-
-            // MOCK FLOW FOR DEMO (Since we can't enable Phone Provider without SMS secrets)
-            // We will pretend code is sent.
-            console.warn("Supabase Phone Auth error (expected if provider not configured):", error.message);
-            setStep("OTP");
-        } else {
-            setStep("OTP");
+            // Successfully logged in
+            router.push("/dashboard");
+            router.refresh();
+        } catch (err: any) {
+            console.error("Auth error:", err);
+            if (err.message && err.message.includes("Failed to fetch")) {
+                setError("Tarmoq xatosi: MAKON serveri (Supabase) hozir oflayn yoki 'Uxlash' (Paused) rejimida. Iltimos, Supabase paneliga kirib loyihani faollashtiring.");
+            } else {
+                setError(err.message || "Xatolik yuz berdi");
+            }
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
-    const handleVerifyCode = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
-
-        const formattedPhone = phone.startsWith("+") ? phone : `+998${phone.replace(/\s/g, "")}`;
-
-        const { error } = await supabase.auth.verifyOtp({
-            phone: formattedPhone,
-            token: otp,
-            type: "sms",
-        });
-
-        if (error) {
-            // MOCK FLOW: Accepting any code '123456' to allow user to enter Dashboard
-            if (otp === "123456") {
-                // Create a fake session or just push (This is unsafe for prod but allows dev progress)
-                // To do this properly, we need anon login or real auth.
-                // Let's try anonymous sign in first if OTP fails
-                // OR check if we can just redirect (AuthGuard defines access)
-                router.push("/dashboard");
+    const handleGoogleLogin = async () => {
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/auth/callback`,
+                }
+            });
+            if (error) throw error;
+        } catch (err: any) {
+            console.error("OAuth xatosi:", err);
+            if (err.message && err.message.includes("Failed to fetch")) {
+                setError("Tarmoq xatosi: MAKON serveri hozir oflayn. Iltimos tekshiring.");
             } else {
-                setError("Kod noto&apos;g&apos;ri (Demo uchun: 123456)");
+                setError(err.message || "Google orqali kirishda xatolik yuz berdi");
             }
-        } else {
-            router.push("/dashboard");
         }
-        setLoading(false);
     };
 
     return (
@@ -83,19 +73,12 @@ export default function LoginPage() {
                 Ortga
             </Link>
 
-
             <div className="glass-card w-full max-w-md p-8 animate-in fade-in zoom-in duration-500">
                 <div className="mb-8 text-center flex flex-col items-center">
-                    <Image
-                        src="/logo.jpg"
-                        alt="MAKON"
-                        width={64}
-                        height={64}
-                        className="h-16 w-16 mb-4 rounded-2xl object-cover shadow-lg shadow-primary/20"
-                    />
+                    <Logo variant="white" size="lg" showText={false} className="mb-6 scale-125" />
                     <h1 className="text-3xl font-bold text-white">Xush Kelibsiz</h1>
                     <p className="mt-2 text-sm text-muted-foreground">
-                        {step === "PHONE" ? "Telefon raqamingiz orqali kiring" : "SMS kodni kiriting"}
+                        Akkauntingizga kirish uchun ma&apos;lumotlarni kiriting
                     </p>
                 </div>
 
@@ -104,51 +87,90 @@ export default function LoginPage() {
                         {error}
                     </div>
                 )}
+                {success && (
+                    <div className="mb-4 rounded-lg bg-green-500/10 p-3 text-center text-sm text-green-500 border border-green-500/20">
+                        {success}
+                    </div>
+                )}
 
-                {step === "PHONE" ? (
-                    <form className="space-y-4" onSubmit={handleSendCode}>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-foreground pl-1">Telefon Raqam</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-3 text-muted-foreground">+998</span>
-                                <input
-                                    type="tel"
-                                    value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    className="w-full rounded-xl bg-black/20 border border-white/10 p-3 pl-14 text-white placeholder:text-muted-foreground/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                                    placeholder="90 123 45 67"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <button disabled={loading} className="w-full flex items-center justify-center rounded-xl bg-primary py-3 font-bold text-[#0A192F] hover:bg-primary/90 transition-all shadow-[0_0_20px_rgba(0,180,216,0.3)] hover:shadow-[0_0_30px_rgba(0,180,216,0.5)]">
-                            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Kod Yuborish"}
-                        </button>
-                    </form>
-                ) : (
-                    <form className="space-y-4" onSubmit={handleVerifyCode}>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-foreground pl-1">SMS Kod</label>
+                <form className="space-y-4" onSubmit={handleLogin}>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-muted-foreground pl-1">Elektron pochta</label>
+                        <div className="relative">
+                            <Mail className="absolute left-4 top-3 h-5 w-5 text-muted-foreground" />
                             <input
-                                type="text"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
-                                className="w-full rounded-xl bg-black/20 border border-white/10 p-3 text-center text-2xl tracking-widest text-white placeholder:text-muted-foreground/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                                placeholder="000000"
-                                maxLength={6}
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full rounded-xl bg-black/20 border border-white/10 p-3 pl-12 text-white placeholder:text-muted-foreground/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                placeholder="name@example.com"
                                 required
                             />
                         </div>
+                    </div>
 
-                        <button disabled={loading} className="w-full flex items-center justify-center rounded-xl bg-primary py-3 font-bold text-[#0A192F] hover:bg-primary/90 transition-all shadow-[0_0_20px_rgba(0,180,216,0.3)] hover:shadow-[0_0_30px_rgba(0,180,216,0.5)]">
-                            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Tasdiqlash"}
-                        </button>
-                        <button type="button" onClick={() => setStep("PHONE")} className="w-full text-sm text-muted-foreground hover:text-white mt-2">
-                            Raqamni o&apos;zgartirish
-                        </button>
-                    </form>
-                )}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between pl-1">
+                            <label className="text-sm font-medium text-muted-foreground">Parol</label>
+                            <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                                Parolni unutdingizmi?
+                            </Link>
+                        </div>
+                        <div className="relative">
+                            <Lock className="absolute left-4 top-3 h-5 w-5 text-muted-foreground" />
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full rounded-xl bg-black/20 border border-white/10 p-3 pl-12 text-white placeholder:text-muted-foreground/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                placeholder="••••••••"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <button disabled={loading} className="w-full flex items-center justify-center rounded-xl bg-primary py-3 font-bold text-[#0A192F] hover:bg-primary/90 transition-all shadow-[0_0_20px_rgba(0,180,216,0.3)] hover:shadow-[0_0_30px_rgba(0,180,216,0.5)]">
+                        {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Kirish"}
+                    </button>
+
+                    <div className="relative py-4">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-white/10" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-[#0A192F] px-2 text-muted-foreground">
+                                Yoki
+                            </span>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={handleGoogleLogin}
+                        className="w-full flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 py-3 font-medium text-white hover:bg-white/10 transition-all"
+                    >
+                        <svg className="h-5 w-5" viewBox="0 0 24 24">
+                            <path
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                fill="#4285F4"
+                            />
+                            <path
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                fill="#34A853"
+                            />
+                            <path
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                fill="#FBBC05"
+                            />
+                            <path
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                fill="#EA4335"
+                            />
+                            <path d="M1 1h22v22H1z" fill="none" />
+                        </svg>
+                        Google orqali kirish
+                    </button>
+                </form>
 
                 <div className="mt-6 text-center text-sm text-muted-foreground">
                     Akkauntingiz yo&apos;qmi?{" "}

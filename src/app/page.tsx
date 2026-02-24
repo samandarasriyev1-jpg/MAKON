@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
 
 export default function Home() {
     return (
@@ -9,16 +9,9 @@ export default function Home() {
 
             <nav className="fixed top-0 z-50 w-full glass-sidebar border-b border-white/5 px-6 py-4">
                 <div className="mx-auto flex max-w-7xl items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Image
-                            src="/logo.jpg"
-                            alt="MAKON"
-                            width={40}
-                            height={40}
-                            className="h-10 w-10 rounded-lg object-cover"
-                        />
-                        <span className="text-xl font-bold">MAKON</span>
-                    </div>
+                    <Link href="/" className="flex items-center">
+                        <Logo variant="white" size="md" showText={true} />
+                    </Link>
                     <div className="flex items-center gap-4">
                         <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-white">
                             Kirish

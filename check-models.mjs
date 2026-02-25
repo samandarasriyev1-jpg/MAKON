@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = "AIzaSyA5vuF21xtmtINg0u_3p_CWcUI65d4ZINc";
+const API_KEY = process.env.GOOGLE_API_KEY || "Sizning_Yangi_API_Kalitingiz";
 
 async function listModels() {
     console.log("Fetching available models...");
@@ -32,7 +32,7 @@ async function listModels() {
                 console.log(`✅ ${modelName} IS WORKING!`);
                 return; // Found a working one
             } catch (e) {
-                console.log(`❌ ${modelName} failed: ${e.message.split('[')[0]}`); // Print short error
+                console.log(`❌ ${modelName} failed: ${e.message}`); // Print full error
             }
         }
 

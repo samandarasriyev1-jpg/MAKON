@@ -12,10 +12,8 @@ export async function POST(req: Request) {
 
         const genAI = new GoogleGenerativeAI(apiKey);
 
-        // Based on logs, ONLY 'gemini-2.0-flash' exists for this key (returned 429).
-        // Others returned 404.
-        // We will try 2.0-flash, and if rate limited, we will try to wait and retry once.
-        const modelName = "gemini-2.0-flash";
+        // Fallback to stable free tier model
+        const modelName = "gemini-1.5-flash";
 
         const model = genAI.getGenerativeModel({
             model: modelName,

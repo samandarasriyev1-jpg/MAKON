@@ -1,0 +1,1 @@
+Plugin "@next/next" was conflicted between ".eslintrc.json » eslint-config-next/core-web-vitals » plugin:@next/next/core-web-vitals" and "..\.eslintrc.json » eslint-config-next/core-web-vitals » plugin:@next/next/core-web-vitals".

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 
 export type UserProgress = {
@@ -29,7 +29,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     const [progress, setProgress] = useState<UserProgress[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const refreshProgress = async () => {
+    const refreshProgress = useCallback(async () => {
         if (!user) {
             setProgress([]);
             setLoading(false);
@@ -47,7 +47,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
 
     const updateProgress = async (courseId: string, lessonId: string, seconds: number, completed = false) => {
         try {
@@ -107,7 +107,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         refreshProgress();
-    }, [user]);
+    }, [refreshProgress]);
 
     return (
         <ProgressContext.Provider

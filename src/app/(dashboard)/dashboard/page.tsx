@@ -153,7 +153,7 @@ export default function DashboardPage() {
                                     Davom etish
                                 </div>
                                 <div className="text-xs text-muted-foreground">
-                                    {Math.floor(lastAccessData.progressSec / 60)} daqiqa o'qildi
+                                    {Math.floor(lastAccessData.progressSec / 60)} daqiqa o&apos;qildi
                                 </div>
                             </div>
                             <div className="absolute right-[-20px] bottom-[-20px] opacity-10 group-hover:scale-110 transition-transform duration-500">
@@ -162,7 +162,7 @@ export default function DashboardPage() {
                         </div>
                     ) : (
                         <div className="w-full h-full min-h-[140px] rounded-xl bg-white/5 flex items-center justify-center text-muted-foreground border border-dashed border-white/10">
-                            Hozircha faol kurslar yo'q
+                            Hozircha faol kurslar yo&apos;q
                         </div>
                     )}
                 </div>

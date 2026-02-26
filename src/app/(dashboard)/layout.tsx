@@ -1,6 +1,8 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { ProgressProvider } from "@/components/providers/progress-provider";
 
+export const dynamic = "force-dynamic";
+
 export default function DashboardLayout({
     children,
 }: {

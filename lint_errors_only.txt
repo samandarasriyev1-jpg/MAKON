@@ -1,0 +1,7 @@
+C:\Users\acer\Documents\MAKON\makon\src\app\(dashboard)\dashboard\wallet\page.tsx
+Line 309: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.
+Line 309: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.
+Line 319: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.
+Line 319: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.
+Line 319: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.
+Line 319: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.

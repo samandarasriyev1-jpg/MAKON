@@ -9,9 +9,11 @@ import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 import { defaultLayoutIcons, DefaultVideoLayout } from "@vidstack/react/player/layouts/default";
+import { InteractiveQuiz } from "@/components/lessons/InteractiveQuiz";
 
 interface Lesson {
     id: string;
+    title?: string;
     video_url: string;
     content: string;
     order: number;
@@ -134,6 +136,20 @@ export default function LessonPage() {
                         {lesson.content}
                     </pre>
                 </div>
+
+                {/* Mock Interactive Quiz injected dynamically for demo purposes */}
+                {lesson.content.length > 0 && (
+                    <InteractiveQuiz
+                        question={`${lesson.title || 'Dars'} bo'yicha eng muhim xulosa nima?`}
+                        options={[
+                            "Faqat videolarni ko'rish yetarli emas, amaliyot ham kerak.",
+                            "Mavzuni tushunish shart emas yodlash yetarli.",
+                            "Hamjamiyat faqat o'yin uchun ishlatiladi.",
+                            "AI ustoz hech qanday yordam bera olmaydi."
+                        ]}
+                        correctAnswerIndex={0}
+                    />
+                )}
             </div>
         </div>
     );

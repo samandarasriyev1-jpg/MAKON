@@ -39,6 +39,76 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Failed to save progress" }, { status: 500 });
         }
 
+        // --- Geymifikatsiya va Streak Logikasi ---
+        try {
+            const today = new Date().toISOString().split('T')[0];
+
+            // 1. Streak yangilash
+            const { data: streakData } = await supabase
+                .from('user_streaks')
+                .select('*')
+                .eq('user_id', user.id)
+                .single();
+
+            if (streakData) {
+                const lastDate = streakData.last_activity_date;
+                let newStreak = streakData.current_streak;
+                let longest = streakData.longest_streak;
+                let userKeptStreak = false;
+
+                if (lastDate !== today) {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+                    if (lastDate === yesterdayStr) {
+                        newStreak += 1;
+                        userKeptStreak = true;
+                    } else if (lastDate && lastDate < yesterdayStr) {
+                        if (streakData.freeze_count > 0) {
+                            // Muzlatkich (Freeze) ishlatamiz
+                            await supabase.from('user_streaks').update({ freeze_count: streakData.freeze_count - 1 }).eq('user_id', user.id);
+                            newStreak += 1;
+                            userKeptStreak = true;
+                        } else {
+                            // Streak uzildi
+                            newStreak = 1;
+                        }
+                    } else if (!lastDate) {
+                        // Birinchi kirish
+                        newStreak = 1;
+                    }
+
+                    if (newStreak > longest) longest = newStreak;
+
+                    await supabase.from('user_streaks').update({
+                        current_streak: newStreak,
+                        longest_streak: longest,
+                        last_activity_date: today
+                    }).eq('user_id', user.id);
+                }
+            }
+
+            // 2. Gamification XP (Agar dars tugatilsa, masalan +20 XP)
+            if (completed) {
+                const { data: gameData } = await supabase
+                    .from('gamification_profiles')
+                    .select('total_xp')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (gameData) {
+                    await supabase.from('gamification_profiles').update({
+                        total_xp: gameData.total_xp + 20,
+                        updated_at: new Date().toISOString()
+                    }).eq('user_id', user.id);
+                }
+            }
+        } catch (e) {
+            console.error("Streak/XP logikasida xatolik:", e);
+        }
+        // ------------------------------------------
+
         return NextResponse.json({ success: true, data });
     } catch (err) {
         console.error("Unexpected error saving progress:", err);

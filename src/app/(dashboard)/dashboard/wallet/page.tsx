@@ -12,7 +12,9 @@ import {
     Download,
     Loader2,
     X,
-    CheckCircle2
+    CheckCircle2,
+    Snowflake,
+    ShoppingCart
 } from "lucide-react";
 
 interface Transaction {
@@ -42,6 +44,8 @@ export default function WalletPage() {
 
     // Status State
     const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [isBuying, setIsBuying] = useState(false);
+    const STREAK_FREEZE_PRICE = 10000;
 
     useEffect(() => {
         if (authLoading) return;
@@ -111,6 +115,36 @@ export default function WalletPage() {
         }, 1000);
     };
 
+    const handleBuyFreeze = async () => {
+        if (balance < STREAK_FREEZE_PRICE) {
+            setStatusMessage({ type: 'error', text: "Mablag' yetarli emas!" });
+            setTimeout(() => setStatusMessage(null), 3000);
+            return;
+        }
+
+        setIsBuying(true);
+        try {
+            const res = await fetch("/api/shop/buy", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ item_id: "streak_freeze", price: STREAK_FREEZE_PRICE }),
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setBalance(data.newBalance);
+                setStatusMessage({ type: 'success', text: "Muzlashkun sotib olindi! Endi 1 kun kirmasangiz ham olovingiz o'chmaydi." });
+            } else {
+                setStatusMessage({ type: 'error', text: data.error || "Xatolik yuz berdi" });
+            }
+        } catch (err) {
+            setStatusMessage({ type: 'error', text: "Xatolik yuz berdi" });
+        } finally {
+            setTimeout(() => setStatusMessage(null), 4000);
+            setIsBuying(false);
+        }
+    };
+
     if (authLoading || loading) {
         return (
             <div className="flex h-[50vh] items-center justify-center">
@@ -124,8 +158,8 @@ export default function WalletPage() {
             {/* Status Toast */}
             {statusMessage && (
                 <div className="fixed top-4 right-4 z-50 animate-in fade-in slide-in-from-top-4">
-                    <div className="glass-card p-4 rounded-xl flex items-center gap-3 border border-green-500/30 bg-green-500/10 text-green-400">
-                        <CheckCircle2 className="h-5 w-5" />
+                    <div className={`glass-card p-4 rounded-xl flex items-center gap-3 border ${statusMessage.type === 'success' ? 'border-green-500/30 bg-green-500/10 text-green-400' : 'border-red-500/30 bg-red-500/10 text-red-400'}`}>
+                        {statusMessage.type === 'success' ? <CheckCircle2 className="h-5 w-5" /> : <X className="h-5 w-5" />}
                         <span className="font-bold">{statusMessage.text}</span>
                     </div>
                 </div>
@@ -264,6 +298,36 @@ export default function WalletPage() {
                             </div>
                             <span className="text-sm font-medium text-white">To&apos;liq Tarix</span>
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Gamification Shop section */}
+            <div className="glass-card p-8 rounded-3xl mt-8 relative overflow-hidden group">
+                <div className="flex items-center gap-3 mb-6">
+                    <ShoppingCart className="h-6 w-6 text-purple-400" />
+                    <h3 className="font-bold text-xl text-white">Do&apos;kon (O&apos;yin Elementlari)</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col justify-between hover:bg-white/10 hover:border-purple-400/50 transition-all">
+                        <div>
+                            <div className="h-12 w-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4">
+                                <Snowflake className="h-6 w-6 text-blue-400" />
+                            </div>
+                            <h4 className="text-lg font-bold text-white mb-2">Streak Freeze (Muzlashkun)</h4>
+                            <p className="text-sm text-muted-foreground">Agar bir kun dars qila olmasangiz, Streak (Olov) o&apos;chmasligini ta&apos;minlaydi. O&apos;tkazib yuborilgan kuningizni muzlatib qo&apos;yadi.</p>
+                        </div>
+                        <div className="mt-6 flex items-center justify-between">
+                            <span className="font-mono font-bold text-white">{STREAK_FREEZE_PRICE.toLocaleString()} UZS</span>
+                            <button
+                                onClick={handleBuyFreeze}
+                                disabled={isBuying || balance < STREAK_FREEZE_PRICE}
+                                className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-bold text-sm transition-colors disabled:opacity-50 flex items-center justify-center min-w-[100px]"
+                            >
+                                {isBuying ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sotib olish"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -230,3 +230,19 @@ alter table public.comment_likes enable row level security;
 create policy "Likes viewable by everyone" on public.comment_likes for select using (true);
 create policy "User can like" on public.comment_likes for insert with check (auth.uid() = user_id);
 create policy "User can unlike" on public.comment_likes for delete using (auth.uid() = user_id);
+
+-- 10. Transactions History
+create table if not exists public.transactions (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  amount integer not null,
+  type text check (type in ('credit', 'debit')) not null,
+  description text not null,
+  status text check (status in ('pending', 'completed', 'failed')) default 'completed',
+  created_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+alter table public.transactions enable row level security;
+create policy "Users can view own transactions." on public.transactions for select using (auth.uid() = user_id);
+create policy "Users can insert own transactions." on public.transactions for insert with check (auth.uid() = user_id);
+-- Normally users shouldn't be able to update/delete their own transactions for financial security. Only Admins.

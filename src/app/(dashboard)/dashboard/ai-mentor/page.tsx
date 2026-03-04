@@ -9,9 +9,10 @@ import {
     Loader2,
     RotateCcw
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface Message {
-    id: number;
+    id: string | number;
     role: 'user' | 'ai';
     content: string;
     timestamp: string;
@@ -24,17 +25,41 @@ export default function AIMentorPage() {
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
+    const supabase = createClient();
 
     useEffect(() => {
         setMounted(true);
-        // Set initial message only after mount
-        setMessages([{
-            id: 1,
-            role: 'ai',
-            content: "Assalomu alaykum! Men MAKON AI Ustoziman. \n\nDasturlash bo'yicha har qanday savolingizga javob berishga tayyorman. \n\nBugun nimani o'rganamiz? 🚀",
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }]);
-    }, []);
+
+        async function fetchHistory() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data, error } = await supabase
+                .from('ai_chat_history')
+                .select('*')
+                .order('created_at', { ascending: true });
+
+            if (!error && data && data.length > 0) {
+                const history: Message[] = data.map((d: any) => ({
+                    id: d.id,
+                    role: d.role as 'user' | 'ai',
+                    content: d.content,
+                    timestamp: new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }));
+                setMessages(history);
+            } else {
+                // Set initial message only after mount if there is no history
+                setMessages([{
+                    id: "init",
+                    role: 'ai',
+                    content: "Assalomu alaykum! Men MAKON AI Ustoziman. \n\nDasturlash bo'yicha har qanday savolingizga javob berishga tayyorman. \n\nBugun nimani o'rganamiz? 🚀",
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }]);
+            }
+        }
+
+        fetchHistory();
+    }, [supabase]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

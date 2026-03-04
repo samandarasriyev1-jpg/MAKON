@@ -7,8 +7,10 @@ import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useProgress } from "@/components/providers/progress-provider";
 import { PlayCircle } from "lucide-react";
-import { RewardTrophy } from "@/components/ui/3d/RewardTrophy";
-import { BadgeViewer } from "@/components/ui/3d/BadgeViewer";
+import nextDynamic from "next/dynamic";
+
+const RewardTrophy = nextDynamic(() => import("@/components/ui/3d/RewardTrophy").then(mod => mod.RewardTrophy), { ssr: false });
+const BadgeViewer = nextDynamic(() => import("@/components/ui/3d/BadgeViewer").then(mod => mod.BadgeViewer), { ssr: false });
 import { AiRecommendations } from "@/components/dashboard/AiRecommendations";
 
 export const dynamic = "force-dynamic";
@@ -213,6 +215,7 @@ export default function DashboardPage() {
                                 <div className="flex items-center gap-3">
                                     <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center text-xs font-bold overflow-hidden">
                                         {lb.profiles?.avatar_url ? (
+                                            /* eslint-disable-next-line @next/next/no-img-element */
                                             <img src={lb.profiles.avatar_url} alt="avatar" className="w-full h-full object-cover" />
                                         ) : (
                                             lb.profiles?.full_name?.charAt(0) || "U"

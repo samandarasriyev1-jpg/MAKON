@@ -14,6 +14,8 @@ import {
     Share2,
     Bot
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -26,6 +28,14 @@ const navigation = [
 
 export function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+    const supabase = createClient();
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push("/login");
+        router.refresh();
+    };
 
     return (
         <div className="flex h-full w-20 flex-col items-center py-8 glass-sidebar lg:w-64 lg:items-start lg:px-6 transition-all duration-300">
@@ -62,11 +72,13 @@ export function Sidebar() {
 
             {/* Bottom Actions */}
             <div className="mt-auto w-full space-y-2">
-                <button className="flex w-full items-center justify-center lg:justify-start rounded-xl p-3 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-white transition-all">
+                <Link href="/dashboard/settings" className="flex w-full items-center justify-center lg:justify-start rounded-xl p-3 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-white transition-all">
                     <Settings className="h-6 w-6" />
                     <span className="hidden lg:ml-3 lg:block">Sozlamalar</span>
-                </button>
-                <button className="flex w-full items-center justify-center lg:justify-start rounded-xl p-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-all">
+                </Link>
+                <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center justify-center lg:justify-start rounded-xl p-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-all">
                     <LogOut className="h-6 w-6" />
                     <span className="hidden lg:ml-3 lg:block">Chiqish</span>
                 </button>

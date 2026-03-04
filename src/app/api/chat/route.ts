@@ -1,30 +1,27 @@
-import Groq from "groq-sdk";
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
     try {
-        const { messages } = await req.json();
-        // In a real app, you should just rely on process.env.GROQ_API_KEY.
-        const apiKey = process.env.GROQ_API_KEY;
+        const supabase = createClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-        if (!apiKey) {
-            return NextResponse.json({ error: "API Key not configured" }, { status: 500 });
+        if (authError || !user) {
+            return NextResponse.json({ error: "Unauthorized", details: "Iltimos tizimga kiring." }, { status: 401 });
         }
 
-        const groq = new Groq({ apiKey });
+        const { messages } = await req.json();
 
-        const modelName = "llama3-8b-8192"; // Fast, reliable Groq model
+        const apiKey = process.env.OPENROUTER_API_KEY;
 
-        const systemMessage = {
-            role: "system",
-            content: "You are 'AI Ustoz', a helpful and professional programming mentor for the MAKON platform. Your goal is to help students learn frontend (React, Tailwind, Next.js) and backend development. Be encouraging, concise, and provide code examples where helpful. Always answer in Uzbek language."
-        };
+        if (!apiKey) {
+            return NextResponse.json({ error: "API Key not configured", details: "Iltimos .env.local faylga OPENROUTER_API_KEY kalitini joylashtiring." }, { status: 500 });
+        }
 
-        // Format messages for Groq format: { role: "user" | "assistant", content: string }
-        // The incoming messages from the frontend usually have this format already,
-        // but we ensure the system message is prepended.
+        const systemPrompt = "Sizning ismingiz 'AI Ustoz', MAKON platformasining dasturlash bo'yicha yordamchisisiz. Har doim do'stona, aniq, va O'zbek tilida javob bering. Kod misollarini taqdim eting.";
+
         const formattedMessages = [
-            systemMessage,
+            { role: "system", content: systemPrompt },
             ...messages.map((m: any) => ({
                 role: m.role === 'user' ? 'user' : 'assistant',
                 content: m.content
@@ -32,29 +29,48 @@ export async function POST(req: Request) {
         ];
 
         try {
-            const chatCompletion = await groq.chat.completions.create({
-                messages: formattedMessages as any,
-                model: modelName,
-                temperature: 0.7,
-                max_tokens: 1024,
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${apiKey}`,
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "http://localhost:3000",
+                    "X-Title": "MAKON Platform"
+                },
+                body: JSON.stringify({
+                    model: "google/gemini-2.5-flash", // OpenRouter dagi juda tez va arzon/tekin model
+                    messages: formattedMessages,
+                    max_tokens: 1500 // MUHIM: Tekin(Free) API kalitda token sig'imi oshib ketmasligi uchun cheklov
+                })
             });
 
-            const text = chatCompletion.choices[0]?.message?.content || "";
-
-            return NextResponse.json({ content: text });
-        } catch (error: any) {
-            console.error(`Attempt failed with ${modelName}:`, error.message);
-
-            if (error.status === 429) {
-                return NextResponse.json({
-                    error: "Too Many Requests",
-                    details: "AI serveri juda band (Rate Limit). Iltimos, bir ozdan so'ng urinib ko'ring."
-                }, { status: 429 });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData?.error?.message || "OpenRouter API xatosi");
             }
+
+            const data = await response.json();
+            const responseText = data.choices[0]?.message?.content || "";
+
+            const lastUserMessage = messages[messages.length - 1];
+
+            // Orqa fonda asinxron xotiraga saqlab yuboramiz
+            if (lastUserMessage && lastUserMessage.role === 'user') {
+                supabase.from('ai_chat_history').insert([
+                    { user_id: user.id, role: 'user', content: lastUserMessage.content },
+                    { user_id: user.id, role: 'ai', content: responseText }
+                ]).then(({ error }) => {
+                    if (error) console.error("Chat saving error:", error);
+                });
+            }
+
+            return NextResponse.json({ content: responseText });
+        } catch (error: any) {
+            console.error(`Attempt failed with OpenRouter:`, error.message);
 
             return NextResponse.json({
                 error: "Model Error",
-                details: `Model xatosi: ${error.message}`
+                details: `API xatosi: ${error.message}`
             }, { status: 500 });
         }
 

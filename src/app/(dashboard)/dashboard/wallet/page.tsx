@@ -54,7 +54,7 @@ export default function WalletPage() {
             return;
         }
 
-        async function fetchData() {
+        async function fetchBalance() {
             setLoading(true);
             try {
                 const { data: userData } = await supabase
@@ -64,56 +64,90 @@ export default function WalletPage() {
                     .maybeSingle();
 
                 setBalance(userData?.wallet_balance || 0);
-
-                setTransactions([
-                    {
-                        id: "1",
-                        amount: 150000,
-                        type: "credit",
-                        description: "Frontend kursi sotuvi (Affiliate)",
-                        created_at: new Date().toISOString(),
-                        status: "completed"
-                    },
-                    {
-                        id: "2",
-                        amount: 50000,
-                        type: "debit",
-                        description: "Premium obuna to'lovi",
-                        created_at: new Date(Date.now() - 86400000).toISOString(),
-                        status: "completed"
-                    }
-                ]);
             } catch (error) {
-                console.error("Wallet loading error:", error);
+                console.error("Balance loading error:", error);
+            }
+        }
+
+        async function fetchTransactions() {
+            try {
+                const res = await fetch("/api/wallet/transactions");
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    setTransactions(data.transactions);
+                }
+            } catch (error) {
+                console.error("Transactions loading error:", error);
             } finally {
                 setLoading(false);
             }
         }
-        fetchData();
+
+        fetchBalance();
+        fetchTransactions();
     }, [user, authLoading, supabase]);
-
-    const handleWithdraw = (e: React.FormEvent) => {
+    const handleWithdraw = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Mock API Call
-        setTimeout(() => {
-            setIsWithdrawOpen(false);
-            setStatusMessage({ type: 'success', text: "So'rov muvaffaqiyatli yuborildi!" });
-            setWithdrawAmount("");
-            setTimeout(() => setStatusMessage(null), 3000);
-        }, 1000);
+        try {
+            const res = await fetch("/api/wallet/withdraw", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: Number(withdrawAmount) }),
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setBalance(data.newBalance);
+                setIsWithdrawOpen(false);
+                setStatusMessage({ type: 'success', text: data.message });
+                setWithdrawAmount("");
+                // Refresh transactions
+                const txRes = await fetch("/api/wallet/transactions");
+                const txData = await txRes.json();
+                if (txRes.ok && txData.success) {
+                    setTransactions(txData.transactions);
+                }
+            } else {
+                setStatusMessage({ type: 'error', text: data.error });
+            }
+        } catch (err) {
+            setStatusMessage({ type: 'error', text: "Xatolik yuz berdi" });
+        } finally {
+            setTimeout(() => setStatusMessage(null), 4000);
+        }
     };
 
-    const handleAddCard = (e: React.FormEvent) => {
+    const handleAddCard = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Mock API Call
-        setTimeout(() => {
-            setIsAddCardOpen(false);
-            setStatusMessage({ type: 'success', text: "Karta muvaffaqiyatli qo'shildi!" });
-            setCardNumber("");
-            setCardExpiry("");
-            setTimeout(() => setStatusMessage(null), 3000);
-        }, 1000);
+        try {
+            const res = await fetch("/api/wallet/topup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: 150000, cardNumber: cardNumber }), // Default topup amount for demo
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setBalance(data.newBalance);
+                setIsAddCardOpen(false);
+                setStatusMessage({ type: 'success', text: data.message });
+                setCardNumber("");
+                setCardExpiry("");
+                // Refresh transactions
+                const txRes = await fetch("/api/wallet/transactions");
+                const txData = await txRes.json();
+                if (txRes.ok && txData.success) {
+                    setTransactions(txData.transactions);
+                }
+            } else {
+                setStatusMessage({ type: 'error', text: data.error });
+            }
+        } catch (err) {
+            setStatusMessage({ type: 'error', text: "Xatolik yuz berdi" });
+        } finally {
+            setTimeout(() => setStatusMessage(null), 4000);
+        }
     };
+
+
 
     const handleBuyFreeze = async () => {
         if (balance < STREAK_FREEZE_PRICE) {

@@ -17,40 +17,20 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Noto'g'ri summa kiritildi" }, { status: 400 });
         }
 
-        // 1. Get current balance
-        const { data: userData } = await supabase
-            .from("users")
-            .select("wallet_balance")
-            .eq("id", user.id)
-            .single();
+        // Use RPC for secure transaction
+        const { data: rpcData, error: rpcError } = await supabase.rpc('process_wallet_transaction', {
+            p_user_id: user.id,
+            p_amount: amount,
+            p_type: 'debit',
+            p_description: "Karta orqali pul yechib olish so'rovi"
+        });
 
-        if (!userData || userData.wallet_balance < amount) {
-            return NextResponse.json({ error: "Hisobingizda yetarli mablag&apos; mavjud emas" }, { status: 400 });
+        if (rpcError) {
+            console.error("RPC Error:", rpcError);
+            return NextResponse.json({ error: rpcError.message || "Tranzaksiya xatosi" }, { status: 400 });
         }
 
-        // 2. Insert pending transaction
-        const { error: txError } = await supabase
-            .from("transactions")
-            .insert({
-                user_id: user.id,
-                amount: amount,
-                type: 'debit',
-                description: 'Karta orqali pul yechib olish so&apos;rovi',
-                status: 'pending'
-            });
-
-        if (txError) {
-            throw txError;
-        }
-
-        // 3. Deduct from wallet balance
-        const newBalance = userData.wallet_balance - amount;
-        await supabase
-            .from("users")
-            .update({ wallet_balance: newBalance })
-            .eq("id", user.id);
-
-        return NextResponse.json({ success: true, newBalance, message: "So'rov muvaffaqiyatli qabul qilindi. 24 soat ichida ko'rib chiqiladi." });
+        return NextResponse.json({ success: true, newBalance: rpcData.new_balance, message: "So'rov muvaffaqiyatli qabul qilindi. 24 soat ichida ko'rib chiqiladi." });
     } catch (err) {
         console.error("Withdraw endpoint error:", err);
         return NextResponse.json({ error: "Dastur xatosi yuz berdi" }, { status: 500 });

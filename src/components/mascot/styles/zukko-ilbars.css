@@ -1,0 +1,11 @@
+/* Styling overrides for the Image Mascot. We don't need complex CSS shapes anymore. Framer motion handles the 2.5D animations. */
+
+.zukko-wrapper {
+    perspective: 1000px;
+}
+
+/* Remove image dragging default behavior so framer motion drag works perfectly */
+.zukko-wrapper img {
+    -webkit-user-drag: none;
+    user-select: none;
+}

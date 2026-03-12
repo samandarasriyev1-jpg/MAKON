@@ -13,11 +13,12 @@ import { InteractiveQuiz } from "@/components/lessons/InteractiveQuiz";
 
 interface Lesson {
     id: string;
-    title?: string;
+    title: string;
     video_url: string;
     content: string;
     order: number;
     course_id: string;
+    duration?: number;
 }
 
 import { useAuth } from "@/components/providers/auth-provider";
@@ -117,7 +118,7 @@ export default function LessonPage() {
             <div className="glass-card p-8">
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl font-bold text-white">
-                        {lesson.content ? lesson.content.split('\n')[0].replace('# ', '') : `Dars ${lesson.order}`}
+                        {lesson.title || `Dars ${lesson.order}`}
                     </h1>
                     <button
                         onClick={handleComplete}

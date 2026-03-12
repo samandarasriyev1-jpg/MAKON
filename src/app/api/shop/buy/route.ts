@@ -17,26 +17,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Noma'lum mahsulot" }, { status: 400 });
         }
 
-        // 1. Get user wallet balance
-        const { data: userData } = await supabase
-            .from("users")
-            .select("wallet_balance")
-            .eq("id", user.id)
-            .single();
+        // Use RPC for secure transaction
+        const { data: rpcData, error: rpcError } = await supabase.rpc('process_wallet_transaction', {
+            p_user_id: user.id,
+            p_amount: price,
+            p_type: 'debit',
+            p_description: "Do'kon xaridi: Streak Freeze"
+        });
 
-        if (!userData || userData.wallet_balance < price) {
-            return NextResponse.json({ error: "Mablag' yetarli emas" }, { status: 400 });
-        }
-
-        // 2. Deduct balance
-        const newBalance = userData.wallet_balance - price;
-        const { error: updateError } = await supabase
-            .from("users")
-            .update({ wallet_balance: newBalance })
-            .eq("id", user.id);
-
-        if (updateError) {
-            return NextResponse.json({ error: "To'lovda xatolik yuz berdi" }, { status: 500 });
+        if (rpcError) {
+            return NextResponse.json({ error: rpcError.message || "Xaridda xatolik yuz berdi" }, { status: 500 });
         }
 
         // 3. Add freeze_count to user_streaks
@@ -51,7 +41,7 @@ export async function POST(request: Request) {
             .from("user_streaks")
             .upsert({ user_id: user.id, freeze_count: currentFreeze + 1 }, { onConflict: "user_id" });
 
-        return NextResponse.json({ success: true, newBalance });
+        return NextResponse.json({ success: true, newBalance: rpcData.new_balance });
     } catch (err) {
         console.error("Shop error:", err);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

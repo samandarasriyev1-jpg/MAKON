@@ -19,40 +19,20 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Noto'g'ri summa kiritildi" }, { status: 400 });
         }
 
-        // 1. Record completed transaction
-        const { error: txError } = await supabase
-            .from("transactions")
-            .insert({
-                user_id: user.id,
-                amount: amount,
-                type: 'credit',
-                description: `Hisob to'ldirildi (Karta: **** ${String(cardNumber).slice(-4)})`,
-                status: 'completed'
-            });
+        // 2. Use RPC for secure transaction
+        const { data: rpcData, error: rpcError } = await supabase.rpc('process_wallet_transaction', {
+            p_user_id: user.id,
+            p_amount: amount,
+            p_type: 'credit',
+            p_description: `Hisob to'ldirildi (Karta: **** ${String(cardNumber).slice(-4)})`
+        });
 
-        if (txError) {
-            throw txError;
+        if (rpcError) {
+            console.error("RPC Error:", rpcError);
+            return NextResponse.json({ error: "Tranzaksiya xatosi" }, { status: 500 });
         }
 
-        // 2. Get current balance and add to it
-        const { data: userData } = await supabase
-            .from("users")
-            .select("wallet_balance")
-            .eq("id", user.id)
-            .single();
-
-        const newBalance = (userData?.wallet_balance || 0) + Number(amount);
-
-        const { error: updateError } = await supabase
-            .from("users")
-            .update({ wallet_balance: newBalance })
-            .eq("id", user.id);
-
-        if (updateError) {
-            throw updateError;
-        }
-
-        return NextResponse.json({ success: true, newBalance, message: "Hisob muvaffaqiyatli to'ldirildi!" });
+        return NextResponse.json({ success: true, newBalance: rpcData.new_balance, message: "Hisob muvaffaqiyatli to'ldirildi!" });
     } catch (err) {
         console.error("TopUp endpoint error:", err);
         return NextResponse.json({ error: "Dastur xatosi yuz berdi" }, { status: 500 });

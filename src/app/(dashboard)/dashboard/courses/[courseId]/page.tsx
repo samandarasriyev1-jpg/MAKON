@@ -8,13 +8,11 @@ import { useParams } from "next/navigation";
 
 interface Lesson {
     id: string;
-    title: string; // We might need to extract title from content or add title to schema. 
-    // Schema says: content TEXT. We'll use a snippet of content or just "Lesson {order}" if no title column.
-    // Wait, schema has 'content' but no 'title' for lessons? 
-    // Schema: id, course_id, video_url, content, order.
-    // Let's assume content has title or we just use "Dars {order}"
+    title: string;
     content: string;
     order: number;
+    video_url?: string;
+    duration?: number;
 }
 
 interface Course {
@@ -85,9 +83,8 @@ export default function CourseDetailPage() {
                                     {lesson.order}
                                 </div>
                                 <div>
-                                    {/* Extract title from content (first line) or fallback */}
                                     <h3 className="font-medium text-white">
-                                        {lesson.content.split('\n')[0].replace('# ', '') || `Dars ${lesson.order}`}
+                                        {lesson.title || `Dars ${lesson.order}`}
                                     </h3>
                                     <span className="text-xs text-muted-foreground">Video Dars</span>
                                 </div>

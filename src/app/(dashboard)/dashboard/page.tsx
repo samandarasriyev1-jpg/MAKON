@@ -45,7 +45,7 @@ export default function DashboardPage() {
             try {
                 // 1. Get Wallet Balance
                 const { data: userData } = await supabase
-                    .from("users")
+                    .from("profiles")
                     .select("wallet_balance")
                     .eq("id", user!.id)
                     .maybeSingle();

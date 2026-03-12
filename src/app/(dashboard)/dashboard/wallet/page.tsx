@@ -58,7 +58,7 @@ export default function WalletPage() {
             setLoading(true);
             try {
                 const { data: userData } = await supabase
-                    .from("users")
+                    .from("profiles")
                     .select("wallet_balance")
                     .eq("id", user!.id)
                     .maybeSingle();

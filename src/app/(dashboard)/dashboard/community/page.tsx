@@ -69,7 +69,47 @@ export default function CommunityPage() {
     useEffect(() => {
         if (authLoading) return;
         fetchPosts();
-    }, [authLoading, fetchPosts]);
+
+        const channel = supabase
+            .channel('community-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'community_posts'
+                },
+                () => {
+                    fetchPosts();
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'community_posts'
+                },
+                (payload) => {
+                    // Update only if payload.new exists and has the expected shape
+                    const newPost = payload.new as Post; // Type assertion since payload.new is generic object
+                    if (newPost && newPost.id) {
+                        setPosts(currentPosts => 
+                            currentPosts.map(post => 
+                                post.id === newPost.id 
+                                    ? { ...post, likes_count: newPost.likes_count, comments_count: newPost.comments_count }
+                                    : post
+                            )
+                        );
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [authLoading, fetchPosts, supabase]);
 
     const handleCreatePost = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -107,13 +147,12 @@ export default function CommunityPage() {
 
         try {
             if (currentlyLiked) {
-                await supabase.from("post_likes").delete().match({ post_id: postId, user_id: user.id });
-                await supabase.rpc('decrement_post_likes', { p_post_id: postId }); // Assuming RPC exists or managed another way
-                // Fallback direct update since we don't know if RPC exists:
-                await supabase.from("community_posts").update({ likes_count: currentCount - 1 }).eq("id", postId);
+                // await supabase.from("post_likes").delete().match({ post_id: postId, user_id: user.id });
+                // Use RPC for atomic update
+                await supabase.rpc('toggle_post_like', { p_post_id: postId });
             } else {
-                await supabase.from("post_likes").insert({ post_id: postId, user_id: user.id });
-                await supabase.from("community_posts").update({ likes_count: currentCount + 1 }).eq("id", postId);
+                // await supabase.from("post_likes").insert({ post_id: postId, user_id: user.id });
+                await supabase.rpc('toggle_post_like', { p_post_id: postId });
             }
         } catch (err) {
             console.error(err);

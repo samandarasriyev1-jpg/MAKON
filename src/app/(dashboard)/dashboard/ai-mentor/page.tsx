@@ -59,6 +59,46 @@ export default function AIMentorPage() {
         }
 
         fetchHistory();
+
+        // Subscribe to AI chat updates
+        const channel = supabase
+            .channel('ai-chat')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'ai_chat_history',
+                    filter: 'role=eq.ai' // Only listen for AI responses to avoid double adding user message
+                },
+                (payload) => {
+                    const newMessage = payload.new;
+                    // Check if we already have this message (optimistic UI might have added it, but likely not with same ID)
+                    // Actually, for AI mentor, we usually wait for response. 
+                    // But if we use a background job later, this is useful.
+                    // For now, let's just log it or handle if we want real-time across devices.
+                    // Since the current implementation awaits fetch('/api/chat'), we might duplicate if we add here.
+                    // BUT, if we want to support multi-device sync:
+                    setMessages(current => {
+                        const exists = current.some(m => m.content === newMessage.content && Math.abs(new Date(m.timestamp).getTime() - new Date(newMessage.created_at).getTime()) < 5000);
+                        if (exists) return current;
+                        
+                        // If it's a new message from another device or background process
+                        const newMsg = {
+                            id: newMessage.id,
+                            role: 'ai' as const,
+                            content: newMessage.content,
+                            timestamp: new Date(newMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        };
+                        return [...current, newMsg];
+                    });
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [supabase]);
 
     const scrollToBottom = () => {
@@ -84,6 +124,7 @@ export default function AIMentorPage() {
         setIsTyping(true);
 
         try {
+            // Streaming fetch
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -91,22 +132,39 @@ export default function AIMentorPage() {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                console.error("API Error details:", errorData);
-                const specificError = errorData.details || errorData.error || "Unknown API Error";
-                throw new Error(specificError);
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || "Server xatosi");
             }
 
-            const data = await response.json();
+            if (!response.body) throw new Error("No response body");
 
+            // Initial empty AI message
+            const aiMsgId = Date.now() + 1;
             const aiMessage: Message = {
-                id: Date.now() + 1,
+                id: aiMsgId,
                 role: 'ai',
-                content: data.content,
+                content: "",
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
-
             setMessages(prev => [...prev, aiMessage]);
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let streamedText = "";
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                
+                const chunkValue = decoder.decode(value, { stream: true });
+                streamedText += chunkValue;
+
+                setMessages(prev => prev.map(msg => 
+                    msg.id === aiMsgId 
+                        ? { ...msg, content: streamedText } 
+                        : msg
+                ));
+            }
         } catch (error: any) {
             console.error("Chat error:", error);
             const errorMessage: Message = {
